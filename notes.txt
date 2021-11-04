@@ -1,0 +1,8 @@
+group03
+
+Client Port = 45821
+Phase 1 Server Port = 46821
+Phase 2 Server Port = 48821
+Visiting Name = Davis-Joseph
+Secret Code = 04242?
+Travel Location = Newark?
