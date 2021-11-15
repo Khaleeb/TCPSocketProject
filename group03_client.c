@@ -56,9 +56,13 @@ int main(void) {
    char *rd_StepNumber, *rd_svPortNo, *rd_svSecretCode, *rd_svTravelLocation;
 
 
+   // Get hostname,
+   printf("Enter hostname of server: ");
+   scanf("%s", server_hostname);
 
 
-
+for(int i = 48000; i < 49000; i++){
+  server_port = i;
    /* open a socket */
    if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
       perror("Client: can't open stream socket");
@@ -82,9 +86,6 @@ int main(void) {
 
 
    /* initialize server address information */
-   // Get hostname,
-   printf("Enter hostname of server: ");
-   scanf("%s", server_hostname);
    if ((server_hp = gethostbyname(server_hostname)) == NULL) {
       perror("Client: invalid server hostname");
       close(sock_client);
@@ -223,6 +224,7 @@ int main(void) {
 
    /* close the socket */
    fclose(tempFile);
-   //system("mv ./tempTravel.txt ./Travel.txt");
+   system("mv ./tempTravel.txt ./Travel.txt");
    close (sock_client);
+ }
 }
