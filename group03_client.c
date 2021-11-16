@@ -46,6 +46,8 @@ int main(void) {
    message sendMessage, recvMessage;
    //unsigned int msg_len;  /* length of message */
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
+   int connectionStatus;
+
 
    /* I/O setup*/
    FILE *travelFile;
@@ -61,13 +63,16 @@ int main(void) {
    scanf("%s", server_hostname);
 
 
-for(int i = 48000; i < 49000; i++){
+for(int i = 48000; i < 48006; i++){     //Change to i < 49000
   server_port = i;
+  if(i == 48002)
+      server_port = SV_PORTNO;     // remove
    /* open a socket */
    if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
       perror("Client: can't open stream socket");
       exit(1);
    }
+   printf("stream socket open\n"); //DB
 
    // Client side stuff for connection:
    memset(&client_addr, 0, sizeof(client_addr));
@@ -82,6 +87,7 @@ for(int i = 48000; i < 49000; i++){
       close(sock_client);
       exit(1);
    }
+   printf("bind local socket\n"); //DB
 
 
 
@@ -91,6 +97,7 @@ for(int i = 48000; i < 49000; i++){
       close(sock_client);
       exit(1);
    }
+   printf("init server address information\n"); //DB
 
    /* Clear server address structure and initialize with server address */
    memset(&server_addr, 0, sizeof(server_addr));
@@ -107,8 +114,10 @@ for(int i = 48000; i < 49000; i++){
                                     sizeof (server_addr)) < 0) {
       perror("Client: can't connect to server");
       close(sock_client);
-      exit(1);
+      continue;
    }
+   printf("connect to server\n"); //DB
+   connectionStatus = 1;
 
    /* I/O loop */
    travelFile = fopen("./Travel.txt", "r");
@@ -143,6 +152,11 @@ for(int i = 48000; i < 49000; i++){
          bytes_recd = recv(sock_client, &recvMessage, sizeof(message), 0);
               /* recvs matching step number, cl port no, sv port no, secret code
                 if valid, otherwise recvs prev message */
+        if(bytes_recd <= 0){
+          printf("connection broke\n");
+          close(sock_client);
+          connectionStatus = 0;
+        }
          printf("Message received:\t%d,\t%d,\t%d,\t%d,\t%s\n",
               ntohs(recvMessage.stepNumber), ntohs(recvMessage.clPortNo),
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
@@ -172,6 +186,11 @@ for(int i = 48000; i < 49000; i++){
          bytes_recd = recv(sock_client, &recvMessage, sizeof(message), 0);
               /* recvs matching step number, cl port no, sv port no, secret code
                 and text if valid, otherwise recvs prev message */
+                if(bytes_recd <= 0){
+                  printf("connection broke\n");
+                  close(sock_client);
+                  connectionStatus = 0;
+                }
          printf("Message received:\t%d,\t%d,\t%d,\t%d,\t%s\n",
               ntohs(recvMessage.stepNumber), ntohs(recvMessage.clPortNo),
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
@@ -211,6 +230,11 @@ for(int i = 48000; i < 49000; i++){
      /* get response from server */
      bytes_recd = recv(sock_client, &recvMessage, sizeof(message), 0);
           // recvs matching step number, cl port no, and sv port no
+          if(bytes_recd <= 0){
+            printf("connection broke\n");
+            close(sock_client);
+            connectionStatus = 0;
+          }
      printf("Message received:\t%d,\t%d,\t%d,\t%d,\t%s\n",
               ntohs(recvMessage.stepNumber), ntohs(recvMessage.clPortNo),
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
@@ -220,11 +244,10 @@ for(int i = 48000; i < 49000; i++){
                 ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
                 recvMessage.text);
    }
-
-
+   if(connectionStatus == 1)
+      system("mv ./tempTravel.txt ./Travel.txt");
    /* close the socket */
    fclose(tempFile);
-   system("mv ./tempTravel.txt ./Travel.txt");
    close (sock_client);
  }
 }

@@ -132,7 +132,7 @@ int main(void) {
       if(step_no == 1) {
               /* step 1 */
               sendMessage.stepNumber = htons(1);
-              sendMessage.clPortNo = client_port;
+              sendMessage.clPortNo = htons(client_port);
               sendMessage.svSecretCode = htons(0);
               sendMessage.text[0] = '*';
               sendMessage.text[1] = '\0';
