@@ -1,6 +1,6 @@
 /* tcpserver.c */
 /* Programmed by Adarsh Sethi */
-/* Sept. 19, 2021 */    
+/* Sept. 19, 2021 */
 
 #include <ctype.h>          /* for toupper */
 #include <stdio.h>          /* for standard I/O functions */
@@ -10,13 +10,29 @@
 #include <netinet/in.h>     /* for sockaddr_in */
 #include <unistd.h>         /* for close */
 
-#define STRING_SIZE 1024   
+#define STRING_SIZE 1024
 
 /* SERV_TCP_PORT is the port number on which the server listens for
    incoming requests from clients. You should change this to a different
    number to prevent conflicts with others in the class. */
 
-#define SERV_TCP_PORT 65000
+//#define SERV_TCP_PORT 65000
+
+#define CL_HOSTNAME "localhost"
+#define SV_HOSTNAME "localhost"
+#define CL_PORTNO 45821
+#define SV_PORTNO 46821     /*Phase 1: 46821      Phase 2: 48821*/
+#define CL_VISITORNAME "Davis-Joseph"
+#define SV_TRAVELLOCATION "Wilmington"
+#define SV_SECRETCODE 4242
+
+typedef struct message{
+  unsigned short stepNumber;
+  unsigned short clPortNo;
+  unsigned short svPortNo;
+  unsigned short svSecretCode;
+  char text[80];
+} message;
 
 int main(void) {
 
@@ -26,7 +42,11 @@ int main(void) {
    struct sockaddr_in server_addr;  /* Internet address structure that
                                         stores server address */
    unsigned int server_addr_len;  /* Length of server address structure */
-   unsigned short server_port;  /* Port number used by server (local port) */
+   unsigned short server_port = SV_PORTNO;  /* Port number used by server (local port) */
+
+   unsigned short client_port = CL_PORTNO;  //CLient port
+
+   unsigned short step_no = 0;
 
    struct sockaddr_in client_addr;  /* Internet address structure that
                                         stores client address */
@@ -38,21 +58,28 @@ int main(void) {
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
    unsigned int i;  /* temporary loop variable */
 
+   message sendMessage, recvMessage;
+
+   FILE *visitorFile;
+   FILE *tempFile;
+
+   int found = 0;
+
    /* open a socket */
 
    if ((sock_server = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
       perror("Server: can't open stream socket");
-      exit(1);                                                
+      exit(1);
    }
 
    /* initialize server address information */
-    
+
    memset(&server_addr, 0, sizeof(server_addr));
    server_addr.sin_family = AF_INET;
    server_addr.sin_addr.s_addr = htonl (INADDR_ANY);  /* This allows choice of
                                         any host interface, if more than one
-                                        are present */ 
-   server_port = SERV_TCP_PORT; /* Server will listen on this port */
+                                        are present */
+   server_port = SV_PORTNO; /* Server will listen on this port */
    server_addr.sin_port = htons(server_port);
 
    /* bind the socket to the local server port */
@@ -62,7 +89,7 @@ int main(void) {
       perror("Server: can't bind to local address");
       close(sock_server);
       exit(1);
-   }                     
+   }
 
    /* listen for incoming requests from clients */
 
@@ -72,46 +99,57 @@ int main(void) {
       exit(1);
    }
    printf("I am here to listen ... on port %hu\n\n", server_port);
-  
+
    client_addr_len = sizeof (client_addr);
 
    /* wait for incoming connection requests in an indefinite loop */
 
    for (;;) {
 
-      sock_connection = accept(sock_server, (struct sockaddr *) &client_addr, 
+      sock_connection = accept(sock_server, (struct sockaddr *) &client_addr,
                                          &client_addr_len);
                      /* The accept function blocks the server until a
                         connection request comes from a client */
       if (sock_connection < 0) {
-         perror("Server: accept() error\n"); 
+         perror("Server: accept() error\n");
          close(sock_server);
          exit(1);
       }
- 
+
+      visitorFile = fopen("./Visitor.txt", "r");
+      tempFile - fopen("./tempVisitor.txt", "w");
+
       /* receive the message */
 
-      bytes_recd = recv(sock_connection, sentence, STRING_SIZE, 0);
+      sendMessage.svPortNo = htons(server_port);
 
-      if (bytes_recd > 0){
-         printf("Received Sentence is:\n");
-         printf("%s", sentence);
-         printf("\nwith length %d\n\n", bytes_recd);
+      bytes_recd = recv(sock_connection, &recvMessage, sizeof(message), 0);
 
-        /* prepare the message to send */
+      client_port = ntohs(recvMessage.clPortNo);
 
-         msg_len = bytes_recd;
+      step_no = ntohs(recvMessage.stepNumber);
 
-         for (i=0; i<msg_len; i++)
-            modifiedSentence[i] = toupper (sentence[i]);
+      if(step_no == 1) {
+              /* step 1 */
+              sendMessage.stepNumber = htons(1);
+              sendMessage.clPortNo = client_port;
+              sendMessage.svSecretCode = htons(0);
+              sendMessage.text[0] = '*';
+              sendMessage.text[1] = '\0';
 
-         /* send message */
- 
-         bytes_sent = send(sock_connection, modifiedSentence, msg_len, 0);
+              bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
+
+              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
       }
 
-      /* close the socket */
+     /* else if (step_no == 2) {
 
+      }*/
+
+      /* close the socket */
+      fclose(visitorFile);
+      fclose(tempFile);
+      system("mv ./tempVisitor.txt ./Visitor.txt");
       close(sock_connection);
-   } 
+   }
 }
