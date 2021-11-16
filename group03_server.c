@@ -52,8 +52,8 @@ int main(void) {
                                         stores client address */
    unsigned int client_addr_len;  /* Length of client address structure */
 
-   char sentence[STRING_SIZE];  /* receive message */
-   char modifiedSentence[STRING_SIZE]; /* send message */
+   //char sentence[STRING_SIZE];  /* receive message */
+   //char modifiedSentence[STRING_SIZE]; /* send message */
    unsigned int msg_len;  /* length of message */
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
    unsigned int i;  /* temporary loop variable */
@@ -117,7 +117,7 @@ int main(void) {
       }
 
       visitorFile = fopen("./Visitor.txt", "r");
-      tempFile - fopen("./tempVisitor.txt", "w");
+      tempFile = fopen("./tempVisitor.txt", "w");
 
       /* receive the message */
 
