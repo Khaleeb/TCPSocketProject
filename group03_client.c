@@ -63,41 +63,44 @@ int main(void) {
    scanf("%s", server_hostname);
 
 
-for(int i = 48000; i < 48006; i++){     //Change to i < 49000
+for(int i = 48000; i < 49000; i++){     //Change to i < 49000
   server_port = i;
-  if(i == 48002)
-      server_port = SV_PORTNO;     // remove
-   /* open a socket */
-   if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-      perror("Client: can't open stream socket");
-      exit(1);
-   }
-   printf("stream socket open\n"); //DB
-
-   // Client side stuff for connection:
-   memset(&client_addr, 0, sizeof(client_addr));
-   client_addr.sin_family = AF_INET;
-   client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-   client_addr.sin_port = htons(client_port);
-
-   /* bind local socket and port */
-   if (bind(sock_client, (struct sockaddr *) &client_addr,
-                                    sizeof (client_addr)) < 0) {
-      perror("Client: can't bind to local address\n");
-      close(sock_client);
-      exit(1);
-   }
-   printf("bind local socket\n"); //DB
+  //if(i == 48002)
+      //server_port = SV_PORTNO;     // remove
 
 
+      /* open a socket */
+      if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+         perror("Client: can't open stream socket");
+         exit(1);
+      }
+      printf("stream socket open\n"); //DB
 
-   /* initialize server address information */
-   if ((server_hp = gethostbyname(server_hostname)) == NULL) {
-      perror("Client: invalid server hostname");
-      close(sock_client);
-      exit(1);
-   }
-   printf("init server address information\n"); //DB
+      // Client side stuff for connection:
+      memset(&client_addr, 0, sizeof(client_addr));
+      client_addr.sin_family = AF_INET;
+      client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+      client_addr.sin_port = htons(client_port);
+
+      /* bind local socket and port */
+      if (bind(sock_client, (struct sockaddr *) &client_addr,
+                                       sizeof (client_addr)) < 0) {
+         perror("Client: can't bind to local address, already bound\n");
+         //close(sock_client);
+         //continue;
+      }
+      printf("bind local socket\n"); //DB
+
+
+
+      /* initialize server address information */
+      if ((server_hp = gethostbyname(server_hostname)) == NULL) {
+         perror("Client: invalid server hostname");
+         close(sock_client);
+         exit(1);
+      }
+      printf("init server address information\n"); //DB
+
 
    /* Clear server address structure and initialize with server address */
    memset(&server_addr, 0, sizeof(server_addr));
@@ -248,6 +251,6 @@ for(int i = 48000; i < 48006; i++){     //Change to i < 49000
       system("mv ./tempTravel.txt ./Travel.txt");
    /* close the socket */
    fclose(tempFile);
-   close (sock_client);
+   close(sock_client);
  }
 }

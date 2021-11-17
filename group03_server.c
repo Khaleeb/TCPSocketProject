@@ -68,6 +68,8 @@ int main(void) {
 
    FILE *visitorFile;
    FILE *tempFile;
+   int cmdSize = sizeof("cat Visitor.txt | sed -e '/xxxxx/d' > tempVisitor.txt");
+   char command[cmdSize];
 
    int found = 0;
 
@@ -104,7 +106,7 @@ int main(void) {
       close(sock_server);
       exit(1);
    }
-   printf("I am here to listen ... on port %hu\n\n", server_port);
+   //printf("I am here to listen ... on port %hu\n\n", server_port);
 
    client_addr_len = sizeof (client_addr);
 
@@ -122,9 +124,6 @@ int main(void) {
          exit(1);
       }
 
-      visitorFile = fopen("./Visitor.txt", "r");
-      tempFile - fopen("./tempVisitor.txt", "w");
-
       /* receive the message */
 
       sendMessage.svPortNo = htons(server_port);
@@ -138,6 +137,11 @@ int main(void) {
       rc_sv_port = ntohs(recvMessage.svPortNo);
 
       rc_secret = ntohs(recvMessage.svSecretCode);
+      snprintf(command, cmdSize, "cat Visitor.txt | sed -e '/%d/d' > tempVisitor.txt", client_port);
+      system(command);
+      //printf("test: %s", command); //DB
+      visitorFile = fopen("./Visitor.txt", "r");
+      tempFile = fopen("./tempVisitor.txt", "a");
 
       if(step_no == 1) {
               /* step 1 */
@@ -149,7 +153,7 @@ int main(void) {
 
               bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
 
-              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
+              fprintf(tempFile, "%d,%d,%s\n", step_no, client_port, recvMessage.text);
       }
 
       else if (step_no == 2) {
@@ -172,7 +176,7 @@ int main(void) {
 
               bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
 
-              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
+              fprintf(tempFile, "%d,%d,%s\n", step_no, client_port, recvMessage.text);
       }
 
       else {
@@ -194,7 +198,7 @@ int main(void) {
 
               bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
 
-              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
+              fprintf(tempFile, "%d,%d,%s\n", step_no, client_port, recvMessage.text);
       }
 
       /* close the socket */
@@ -204,4 +208,3 @@ int main(void) {
       close(sock_connection);
    }
 }
-
