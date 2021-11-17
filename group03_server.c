@@ -44,7 +44,13 @@ int main(void) {
    unsigned int server_addr_len;  /* Length of server address structure */
    unsigned short server_port = SV_PORTNO;  /* Port number used by server (local port) */
 
+   unsigned short rc_sv_port = SV_PORTNO;
+
    unsigned short client_port = CL_PORTNO;  //CLient port
+
+   unsigned short rc_secret = SV_SECRETCODE;
+
+   char send_text[80] = SV_TRAVELLOCATION;
 
    unsigned short step_no = 0;
 
@@ -52,8 +58,8 @@ int main(void) {
                                         stores client address */
    unsigned int client_addr_len;  /* Length of client address structure */
 
-   //char sentence[STRING_SIZE];  /* receive message */
-   //char modifiedSentence[STRING_SIZE]; /* send message */
+   char sentence[STRING_SIZE];  /* receive message */
+   char modifiedSentence[STRING_SIZE]; /* send message */
    unsigned int msg_len;  /* length of message */
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
    unsigned int i;  /* temporary loop variable */
@@ -117,7 +123,7 @@ int main(void) {
       }
 
       visitorFile = fopen("./Visitor.txt", "r");
-      tempFile = fopen("./tempVisitor.txt", "w");
+      tempFile - fopen("./tempVisitor.txt", "w");
 
       /* receive the message */
 
@@ -128,6 +134,10 @@ int main(void) {
       client_port = ntohs(recvMessage.clPortNo);
 
       step_no = ntohs(recvMessage.stepNumber);
+
+      rc_sv_port = ntohs(recvMessage.svPortNo);
+
+      rc_secret = ntohs(recvMessage.svSecretCode);
 
       if(step_no == 1) {
               /* step 1 */
@@ -142,9 +152,50 @@ int main(void) {
               fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
       }
 
-     /* else if (step_no == 2) {
+      else if (step_no == 2) {
+              /* step nu 2 */
+              //sendMessage.stepNumber = htons(1);
+              sendMessage.clPortNo = htons(client_port);
+              //sendMessage.svSecretCode = htons(0);
+              sendMessage.text[0] = '*';
+              sendMessage.text[1] = '\0';
 
-      }*/
+              if(rc_sv_port == server_port) {
+                      sendMessage.stepNumber = htons(2);
+                      sendMessage.svSecretCode = htons(SV_SECRETCODE);
+              }
+
+              else {
+                      sendMessage.stepNumber = htons(1);
+                      sendMessage.svSecretCode = htons(0);
+              }
+
+              bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
+
+              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
+      }
+
+      else {
+              /* step 3 */
+              sendMessage.clPortNo = htons(client_port);
+
+              if(rc_sv_port == server_port && rc_secret == SV_SECRETCODE) {
+                      sendMessage.stepNumber = htons(3);
+                      sendMessage.svSecretCode = htons(SV_SECRETCODE);
+                      strcpy(sendMessage.text, send_text);
+              }
+
+              else {
+                      sendMessage.stepNumber = htons(1);
+                      sendMessage.svSecretCode = htons(0);
+                      sendMessage.text[0] = '*';
+                      sendMessage.text[1] = '\0';
+              }
+
+              bytes_sent = send(sock_connection, &sendMessage, sizeof(message), 0);
+
+              fprintf(tempFile, "%d,%d,%s", step_no, client_port, recvMessage.text);
+      }
 
       /* close the socket */
       fclose(visitorFile);
@@ -153,3 +204,4 @@ int main(void) {
       close(sock_connection);
    }
 }
+
