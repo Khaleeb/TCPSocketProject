@@ -8,5 +8,5 @@
 
 #### Deadlines
 * Phase 1: Tuesday 11/16
-* Phase 2: Wednesday 11/17 - 5pm Friday 11/19
+* Phase 2: Wednesday 11/17 - 5pm Friday 11/19, Monday 11/29 - 5pm Wednesday 12/1
 * Phase 3: Thursday 12/2 - 5pm Saturday 12/4
