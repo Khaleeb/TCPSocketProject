@@ -56,6 +56,7 @@ int main(void) {
    char line[250];
    /* stepNumber, svPortNo, svSecretCode, svTravelLocation */
    char *rd_StepNumber, *rd_svPortNo, *rd_svSecretCode, *rd_svTravelLocation;
+   system("cp ./Travel.txt ./TravelBACKUP.txt");
 
 
    // Get hostname,
@@ -66,7 +67,7 @@ int main(void) {
 for(int i = 48000; i < 49000; i++){     //Change to i < 49000
   server_port = i;
   //if(i == 48002)
-      //server_port = SV_PORTNO;     // remove
+      //server_port = 46000;     // remove
 
 
       /* open a socket */
@@ -130,7 +131,7 @@ for(int i = 48000; i < 49000; i++){     //Change to i < 49000
      rd_StepNumber = strtok(line, ",");
      rd_svPortNo = strtok(NULL, ",");
      rd_svSecretCode = strtok(NULL, ",");
-     rd_svTravelLocation = strtok(NULL, ",");
+     rd_svTravelLocation = strtok(NULL, "\n");
 
      if(atoi(rd_svPortNo) == server_port){
        found = 1;
@@ -165,7 +166,7 @@ for(int i = 48000; i < 49000; i++){     //Change to i < 49000
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
               recvMessage.text);
 
-         fprintf(tempFile, "%d,%d,%d,%s", ntohs(recvMessage.stepNumber),
+         fprintf(tempFile, "%d,%d,%d,%s\n", ntohs(recvMessage.stepNumber),
                     ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
                     recvMessage.text);
        } else if(atoi(rd_StepNumber) == 2){
@@ -199,14 +200,16 @@ for(int i = 48000; i < 49000; i++){     //Change to i < 49000
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
               recvMessage.text);
 
-         fprintf(tempFile, "%d,%d,%d,%s", ntohs(recvMessage.stepNumber),
+         fprintf(tempFile, "%d,%d,%d,%s\n", ntohs(recvMessage.stepNumber),
                     ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
                     recvMessage.text);
        } else if(atoi(rd_StepNumber) == 3){
          printf("Already Connected to this 3 times...");
+       fprintf(tempFile, "%s,%s,%s,%s\n", rd_StepNumber, rd_svPortNo,
+                            rd_svSecretCode, rd_svTravelLocation);
        }
      } else {
-       fprintf(tempFile, "%s,%s,%s,%s", rd_StepNumber, rd_svPortNo,
+       fprintf(tempFile, "%s,%s,%s,%s\n", rd_StepNumber, rd_svPortNo,
                             rd_svSecretCode, rd_svTravelLocation);
      }
    }
@@ -243,7 +246,7 @@ for(int i = 48000; i < 49000; i++){     //Change to i < 49000
               ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
               recvMessage.text);
 
-     fprintf(tempFile, "%d,%d,%d,%s", ntohs(recvMessage.stepNumber),
+     fprintf(tempFile, "%d,%d,%d,%s\n", ntohs(recvMessage.stepNumber),
                 ntohs(recvMessage.svPortNo), ntohs(recvMessage.svSecretCode),
                 recvMessage.text);
    }

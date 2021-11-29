@@ -21,7 +21,7 @@
 #define CL_HOSTNAME "localhost"
 #define SV_HOSTNAME "localhost"
 #define CL_PORTNO 45821
-#define SV_PORTNO 46821     /*Phase 1: 46821      Phase 2: 48821*/
+#define SV_PORTNO 48821     /*Phase 1: 46821      Phase 2: 48821*/
 #define CL_VISITORNAME "Davis-Joseph"
 #define SV_TRAVELLOCATION "Wilmington"
 #define SV_SECRETCODE 4242

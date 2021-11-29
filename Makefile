@@ -1,12 +1,12 @@
 CC= /usr/bin/gcc
 
-all:	tcpclient tcpserver 
+all: group03_client group03_server
 
-tcpclient: group03_client.c;
-	${CC} group03_client.c -o tcpclient
+group03_client: group03_client.c;
+	${CC} group03_client.c -o group03_client
 
-tcpserver: group03_server.c;
-	${CC} group03_server.c -o tcpserver
+group03_server: group03_server.c;
+	${CC} group03_server.c -o group03_server
 
 clean:
-	rm tcpclient tcpserver 
+	rm group03_server group03_client
